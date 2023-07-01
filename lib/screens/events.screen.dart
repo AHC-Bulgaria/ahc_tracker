@@ -1,3 +1,4 @@
+import 'package:ahc_tracker/screens/manage_event.dart';
 import 'package:ahc_tracker/widgets/events_calendar.dart';
 import 'package:ahc_tracker/widgets/events_card.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,13 @@ class EventsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('AHC Tracker'),
       ),
-            floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => const ManageEvent(),
+            ),
+          );
         },
         child: const Icon(Icons.add),
       ),

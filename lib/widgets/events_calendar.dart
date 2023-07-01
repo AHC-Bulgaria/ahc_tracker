@@ -1,11 +1,10 @@
-import 'package:ahc_tracker/models/Event.dart';
+import 'package:ahc_tracker/models/event.dart';
 import 'package:ahc_tracker/screens/day_details.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 final kToday = DateTime.now();
-final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
-final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
+final kFirstDay = DateTime(1900);
 
 List<DateTime> daysInRange(DateTime first, DateTime last) {
   final dayCount = last.difference(first).inDays + 1;
@@ -25,42 +24,51 @@ class EventsCalendar extends StatefulWidget {
 class _EventsCalendar extends State<EventsCalendar> {
   DateTime _focusedDay = kToday;
   DateTime? _selectedDay;
-  DateTime? _rangeStart;
-  DateTime? _rangeEnd;
-  Map<DateTime, List<Event>> _rangeEvents = {};
+  // DateTime? _rangeStart;
+  // DateTime? _rangeEnd;
+  Map<DateTime, Event?> _rangeEvents = {};
+
+  @override
+  initState() {
+    _getRangeEvents();
+    super.initState();
+  }
 
   List<Event> _getEventsForDay(DateTime day) {
-    return [
-      Event(
-        severity: generateRandomSeverity(i: day.day),
-        date: day,
-      )
-    ];
+    return _rangeEvents[day] != null ? [_rangeEvents[day]!] : [];
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) async {
     if (!isSameDay(_selectedDay, selectedDay)) {
+      if (_rangeEvents[selectedDay] != null) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (ctx) => DayDetails(
+              event: _rangeEvents[selectedDay]!,
+            ),
+          ),
+        );
+      }
       setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _rangeStart = null;
-        _rangeEnd = null;
+        // _rangeStart = null;
+        // _rangeEnd = null;
       });
-
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (ctx) => DayDetails(
-            // event: _rangeEvents[selectedDay]!.first,
-            event: Event(
-              severity: generateRandomSeverity(i: selectedDay.day),
-              date: selectedDay
-            ),
-          ),
-        ),
-      );
-
-      // _selectedEvents.value = _getEventsForDay(selectedDay);
     }
+  }
+
+  Future<void> _getRangeEvents() async {
+    final refDay = _focusedDay;
+
+    final DateTime start = refDay.subtract(Duration(days: refDay.day - 1));
+    final DateTime end = DateTime(refDay.year, refDay.month + 1)
+        .subtract(const Duration(days: 1));
+
+    final rangeEvents = await Event.fromDateRange(start, end);
+    setState(() {
+      _rangeEvents = rangeEvents;
+    });
   }
 
   @override
@@ -68,11 +76,11 @@ class _EventsCalendar extends State<EventsCalendar> {
     return TableCalendar<Event>(
       // locale: Localizations.localeOf(context).languageCode,
       firstDay: kFirstDay,
-      lastDay: kLastDay,
+      lastDay: kToday,
       focusedDay: _focusedDay,
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-      rangeStartDay: _rangeStart,
-      rangeEndDay: _rangeEnd,
+      // rangeStartDay: _rangeStart,
+      // rangeEndDay: _rangeEnd,
       calendarFormat: CalendarFormat.month,
       rangeSelectionMode: RangeSelectionMode.disabled,
       eventLoader: _getEventsForDay,
@@ -121,6 +129,7 @@ class _EventsCalendar extends State<EventsCalendar> {
       onPageChanged: (focusedDay) {
         setState(() {
           _focusedDay = focusedDay;
+          _getRangeEvents();
         });
       },
     );

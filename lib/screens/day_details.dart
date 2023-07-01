@@ -1,4 +1,4 @@
-import 'package:ahc_tracker/models/Event.dart';
+import 'package:ahc_tracker/models/event.dart';
 import 'package:ahc_tracker/utils/formaters.dart';
 import 'package:ahc_tracker/widgets/heat_indicator.dart';
 import 'package:flutter/material.dart';
