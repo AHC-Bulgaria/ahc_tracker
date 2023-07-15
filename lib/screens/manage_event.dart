@@ -1,5 +1,6 @@
 import 'package:ahc_tracker/models/event.dart';
 import 'package:ahc_tracker/utils/formaters.dart';
+import 'package:ahc_tracker/widgets/severity_slider.dart';
 import 'package:flutter/material.dart';
 
 class ManageEvent extends StatefulWidget {
@@ -10,13 +11,11 @@ class ManageEvent extends StatefulWidget {
 }
 
 class _ManageEvent extends State<ManageEvent> {
-  double _value = 0;
+  final double _value = 0;
   DateTime _date = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
-    Color sliderColor = EventSeverity.values[_value.toInt()].color;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Log'),
@@ -28,7 +27,7 @@ class _ManageEvent extends State<ManageEvent> {
           },
           child: const Text('Cancel'),
         ),
-        ElevatedButton.icon(
+        FilledButton.icon(
           icon: const Icon(Icons.save_outlined),
           label: const Text('Save'),
           onPressed: () async {
@@ -38,73 +37,71 @@ class _ManageEvent extends State<ManageEvent> {
           },
         ),
       ],
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Date selection
-            ListTile(
-              title: Text(dateReadble.format(_date)),
-              subtitle: const Text('Date'),
-              leading: const Icon(Icons.today),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () async {
-                  final gotDate = await showDatePicker(
-                    context: context,
-                    initialDate: _date,
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (gotDate != null) {
-                    setState(() {
-                      _date = gotDate;
-                    });
-                  }
-                },
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Date selection
+              ListTile(
+                title: Text(dateReadble.format(_date)),
+                subtitle: const Text('Date'),
+                leading: const Icon(Icons.today),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () async {
+                    final gotDate = await showDatePicker(
+                      context: context,
+                      initialDate: _date,
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (gotDate != null) {
+                      setState(() {
+                        _date = gotDate;
+                      });
+                    }
+                  },
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
+              const SizedBox(
+                height: 16,
+              ),
+              Text(
+                'Dystonia Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
 
-            // Severity
-            Text(
-              'Severity',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(
-                    Icons.sentiment_satisfied_outlined,
-                    color: EventSeverity.low.color,
-                  ),
-                  Icon(
-                    Icons.sentiment_neutral_outlined,
-                    color: EventSeverity.medium.color,
-                  ),
-                  Icon(Icons.sentiment_dissatisfied_outlined,
-                      color: EventSeverity.nightmare.color),
-                ],
+              TextFormField(
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Number of Dystonia Events'),
               ),
-            ),
-            Slider(
-              divisions: 4,
-              value: _value,
-              min: 0,
-              max: 4,
-              activeColor: sliderColor,
-              onChanged: (p) {
-                setState(() {
-                  _value = p;
-                });
-              },
-            )
-          ],
+              const SizedBox(height: 8),
+              SeveritySlider(
+                  label: 'Dystonia Avg. Severity', onChange: (p) => {print(p)}),
+              // Severity
+              Text(
+                'Hemiplegia Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              SeveritySlider(
+                  label: 'Hemiplegia Avg. Severity',
+                  onChange: (p) => {print(p)}),
+              // Severity
+              Text(
+                'Behavioral Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              SeveritySlider(
+                  label: 'Behavior Avg. Severity', onChange: (p) => {print(p)}),
+              // Severity
+            ],
+          ),
         ),
       ),
     );
